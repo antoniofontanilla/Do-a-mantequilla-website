@@ -147,9 +147,8 @@ export const ClientesPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: "8px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
       <Card
-        styles={{ body: { padding: "12px" } }}
         title={
           <div
             style={{
@@ -157,23 +156,24 @@ export const ClientesPage: React.FC = () => {
               justifyContent: "space-between",
               alignItems: "center",
               flexWrap: "wrap",
-              gap: "8px",
+              gap: "16px",
             }}
           >
-            <Title level={3} style={{ margin: 0, fontSize: "1.1rem" }}>
+            <Title level={2} style={{ margin: 0 }}>
               Gestión de Clientes
             </Title>
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsModalOpen(true)}
+              size="large"
             >
               Nuevo Cliente
             </Button>
           </div>
         }
       >
-        {/* TABLA CON SCROLL HORIZONTAL */}
+        {/* TABLA CON SCROLL HORIZONTAL SOLO SI ES NECESARIO */}
         <div style={{ width: "100%", overflowX: "auto" }}>
           <Table
             columns={columns}
@@ -185,7 +185,7 @@ export const ClientesPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* MODAL CREAR CLIENTE OPTIMIZADO PARA MÓVILES */}
+      {/* MODAL CREAR CLIENTE */}
       <Modal
         title="Agregar Nuevo Cliente"
         open={isModalOpen}
@@ -195,22 +195,15 @@ export const ClientesPage: React.FC = () => {
           setDireccionValidada(null);
         }}
         footer={null}
-        width="92%"
-        style={{ maxWidth: "550px", top: 16 }}
-        styles={{
-          body: {
-            maxHeight: "calc(80vh - 80px)",
-            overflowY: "auto",
-            paddingRight: "4px",
-          },
-        }}
+        width="90%"
+        style={{ maxWidth: "600px" }}
         destroyOnClose
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleCreate}
-          style={{ marginTop: "12px" }}
+          style={{ marginTop: "16px" }}
         >
           <Form.Item
             name="nombre"
@@ -267,8 +260,7 @@ export const ClientesPage: React.FC = () => {
               display: "flex",
               justifyContent: "flex-end",
               gap: "8px",
-              flexWrap: "wrap",
-              marginTop: "16px",
+              marginTop: "24px",
             }}
           >
             <Button onClick={() => setIsModalOpen(false)}>Cancelar</Button>
@@ -283,7 +275,7 @@ export const ClientesPage: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* MODAL MAPA OPTIMIZADO PARA MÓVILES */}
+      {/* MODAL MAPA */}
       <Modal
         title={`Ubicación de ${selectedCliente?.nombre || "Cliente"}`}
         open={isMapModalOpen}
@@ -293,24 +285,21 @@ export const ClientesPage: React.FC = () => {
             key="close"
             type="primary"
             onClick={() => setIsMapModalOpen(false)}
-            block
           >
             Cerrar
           </Button>,
         ]}
-        width="92%"
-        style={{ maxWidth: "650px", top: 16 }}
+        width="90%"
+        style={{ maxWidth: "700px" }}
       >
         <div
           style={{
             width: "100%",
-            height: "50vh",
-            maxHeight: "350px",
-            minHeight: "220px",
+            height: "400px",
             borderRadius: "8px",
             overflow: "hidden",
             backgroundColor: "#e5e3df",
-            marginTop: "8px",
+            marginTop: "16px",
           }}
         >
           {selectedCliente && (
