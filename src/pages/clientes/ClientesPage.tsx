@@ -62,7 +62,7 @@ export const ClientesPage: React.FC = () => {
     ]);
   };
 
-  const handleSelectDireccion = (value: string) => {
+  const handleSelectDireccion = (_value?: string) => {
     setDireccionValidada(true);
     setCoordenadas({ lat: -33.36, lng: -70.52 });
   };

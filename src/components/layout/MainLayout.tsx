@@ -10,14 +10,15 @@ import {
   ToolOutlined,
   RobotOutlined,
 } from "@ant-design/icons";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
 
-export const MainLayout: React.FC = () => {
+interface MainLayoutProps {
+  children?: React.ReactNode;
+}
+
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -25,15 +26,13 @@ export const MainLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh", width: "100vw", overflowX: "hidden" }}>
-      {/* SIDEBAR RESPONSIVO */}
       <Sider
-        breakpoint="lg" // En pantallas menores a 'lg' (tablets/celulares) se colapsa solo
-        collapsedWidth="0" // Ancho 0 cuando está colapsado en móvil
+        breakpoint="lg"
+        collapsedWidth="0"
         trigger={null}
         collapsible
         collapsed={collapsed}
         onBreakpoint={(broken) => {
-          // Se colapsa automáticamente si la pantalla es de celular
           if (broken) setCollapsed(true);
         }}
         style={{
@@ -42,7 +41,7 @@ export const MainLayout: React.FC = () => {
           left: 0,
           top: 0,
           bottom: 0,
-          zIndex: 1000, // Queda por encima del contenido en celular al abrirse
+          zIndex: 1000,
         }}
       >
         <div style={{ padding: "16px", textAlign: "center", color: "#fff" }}>
@@ -57,14 +56,7 @@ export const MainLayout: React.FC = () => {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[location.pathname]}
-          onClick={({ key }) => {
-            navigate(key);
-            // Si está en celular, se cierra el menú al hacer clic en un elemento
-            if (window.innerWidth < 992) {
-              setCollapsed(true);
-            }
-          }}
+          defaultSelectedKeys={["/clientes"]}
           items={[
             { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
             {
@@ -92,10 +84,8 @@ export const MainLayout: React.FC = () => {
         />
       </Sider>
 
-      {/* CONTENEDOR PRINCIPAL */}
       <Layout
         style={{
-          // Margen dinámico: Si el menú está abierto en PC corre el contenido, en móvil no.
           marginLeft: collapsed ? 0 : window.innerWidth < 992 ? 0 : 200,
           transition: "all 0.2s",
           minHeight: "100vh",
@@ -116,7 +106,6 @@ export const MainLayout: React.FC = () => {
             boxShadow: "0 1px 4px rgba(0,21,41,0.08)",
           }}
         >
-          {/* BOTÓN PARA ABRIR/CERRAR MENÚ */}
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -129,7 +118,6 @@ export const MainLayout: React.FC = () => {
           </span>
         </Header>
 
-        {/* ÁREA DE CONTENIDO (PÁGINAS) */}
         <Content
           style={{
             margin: "12px 8px",
@@ -137,10 +125,10 @@ export const MainLayout: React.FC = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-            overflowX: "auto", // Asegura que la tabla no rompa el ancho total
+            overflowX: "auto",
           }}
         >
-          <Outlet /> {/* Aquí carga ClientesPage, Dashboard, etc. */}
+          {children}
         </Content>
       </Layout>
     </Layout>
