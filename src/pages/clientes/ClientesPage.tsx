@@ -8,7 +8,9 @@ import {
   Card,
   Space,
   Typography,
-  Tag,
+  Badge,
+  Row,
+  Col,
   Alert,
   AutoComplete,
 } from "antd";
@@ -17,27 +19,58 @@ import {
   EnvironmentOutlined,
   CheckCircleOutlined,
   WarningOutlined,
+  SearchOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 interface Cliente {
   id: string;
   nombre: string;
+  email: string;
   rut: string;
+  telefono: string;
   direccion: string;
+  comuna: string;
   lat?: number;
   lng?: number;
 }
 
+// Datos de prueba originales
+const datosIniciales: Cliente[] = [
+  {
+    id: "1",
+    nombre: "Juan Pérez",
+    email: "juan.perez@email.com",
+    rut: "12.345.678-5",
+    telefono: "+56 9 1234 5678",
+    direccion: "Av. Las Condes 12345",
+    comuna: "Las Condes",
+    lat: -33.38,
+    lng: -70.53,
+  },
+  {
+    id: "2",
+    nombre: "María González",
+    email: "maria.g@email.com",
+    rut: "9.876.543-1",
+    telefono: "+56 9 8765 4321",
+    direccion: "Av. La Dehesa 456",
+    comuna: "Lo Barnechea",
+    lat: -33.35,
+    lng: -70.51,
+  },
+];
+
 export const ClientesPage: React.FC = () => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>(datosIniciales);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [form] = Form.useForm();
 
-  // Estado para la validación de dirección
   const [direccionValidada, setDireccionValidada] = useState<boolean | null>(
     null,
   );
@@ -45,8 +78,6 @@ export const ClientesPage: React.FC = () => {
     lat: number;
     lng: number;
   } | null>(null);
-
-  // Opciones simuladas para Autocomplete
   const [options, setOptions] = useState<{ value: string }[]>([]);
 
   const handleSearchDireccion = (searchText: string) => {
@@ -81,13 +112,14 @@ export const ClientesPage: React.FC = () => {
   };
 
   const handleCreate = (values: any) => {
-    if (!direccionValidada) return;
-
     const nuevoCliente: Cliente = {
       id: Date.now().toString(),
       nombre: values.nombre,
+      email: values.email || "",
       rut: values.rut,
+      telefono: values.telefono || "",
       direccion: values.direccion,
+      comuna: values.comuna || "",
       lat: coordenadas?.lat,
       lng: coordenadas?.lng,
     };
@@ -106,9 +138,16 @@ export const ClientesPage: React.FC = () => {
 
   const columns = [
     {
-      title: "Nombre",
-      dataIndex: "nombre",
-      key: "nombre",
+      title: "Cliente",
+      key: "cliente",
+      render: (_: any, record: Cliente) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>{record.nombre}</Text>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            {record.email}
+          </Text>
+        </Space>
+      ),
     },
     {
       title: "RUT",
@@ -116,78 +155,134 @@ export const ClientesPage: React.FC = () => {
       key: "rut",
     },
     {
-      title: "Dirección Validada",
-      dataIndex: "direccion",
-      key: "direccion",
-      render: (text: string, record: Cliente) => (
-        <Space direction="vertical" size="small">
-          <Text>{text}</Text>
+      title: "Teléfono",
+      dataIndex: "telefono",
+      key: "telefono",
+    },
+    {
+      title: "Ubicación",
+      key: "ubicacion",
+      render: (_: any, record: Cliente) => (
+        <Space direction="vertical" size={0}>
+          <Text>{record.direccion}</Text>
+          <Text type="secondary" style={{ fontSize: "12px", color: "#1677ff" }}>
+            {record.comuna}
+          </Text>
+        </Space>
+      ),
+    },
+    {
+      title: "GPS & Mapa (HU 2)",
+      key: "gps",
+      render: (_: any, record: Cliente) => (
+        <Space size="middle">
           {record.lat && record.lng && (
-            <Tag color="green" icon={<CheckCircleOutlined />}>
-              GPS: {record.lat}, {record.lng}
-            </Tag>
+            <Text type="success" style={{ fontSize: "13px" }}>
+              <CheckCircleOutlined /> GPS Válido
+            </Text>
           )}
+          <Button
+            type="link"
+            size="small"
+            icon={<EnvironmentOutlined />}
+            onClick={() => verMapa(record)}
+            style={{ padding: 0 }}
+          >
+            Ver Mapa
+          </Button>
         </Space>
       ),
     },
     {
       title: "Acciones",
       key: "acciones",
-      render: (_: any, record: Cliente) => (
-        <Button
-          icon={<EnvironmentOutlined />}
-          type="primary"
-          ghost
-          onClick={() => verMapa(record)}
-        >
-          Ver en Mapa
-        </Button>
+      render: () => (
+        <Space size="middle">
+          <Button type="link" size="small" style={{ padding: 0 }}>
+            Editar
+          </Button>
+          <Button type="link" size="small" danger style={{ padding: 0 }}>
+            Eliminar
+          </Button>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
-      <Card
-        title={
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "16px",
-            }}
-          >
-            <Title level={2} style={{ margin: 0 }}>
-              Gestión de Clientes
-            </Title>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
-              size="large"
-            >
-              Nuevo Cliente
-            </Button>
-          </div>
-        }
+    <div style={{ padding: "8px", maxWidth: "1200px", margin: "0 auto" }}>
+      {/* CABECERA (TÍTULOS) */}
+      <div style={{ marginBottom: 24, padding: "0 12px" }}>
+        <Title level={3} style={{ margin: 0 }}>
+          Gestión de Clientes
+        </Title>
+        <Text type="secondary">
+          Registro unificado, validación legal de RUT y georreferenciación
+          inteligente (HU 1, 2 y 3)
+        </Text>
+      </div>
+
+      {/* CONTROLES (BÚSQUEDA Y MÉTRICAS) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
+          marginBottom: 16,
+          padding: "0 12px",
+        }}
       >
-        {/* TABLA CON SCROLL HORIZONTAL SOLO SI ES NECESARIO */}
+        <Input
+          prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+          placeholder="Buscar por Nombre, RUT, Dirección o Comuna"
+          style={{ maxWidth: "450px", width: "100%" }}
+          size="large"
+        />
+
+        <Space size="large" style={{ flexWrap: "wrap" }}>
+          <Text>
+            Total Clientes: <Badge count={clientes.length} color="#1677ff" />
+          </Text>
+          <Text>
+            Georreferenciados (GPS):{" "}
+            <Badge
+              count={clientes.filter((c) => c.lat).length}
+              color="#52c41a"
+            />
+          </Text>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+            size="large"
+          >
+            Nuevo Cliente
+          </Button>
+        </Space>
+      </div>
+
+      <Card styles={{ body: { padding: 0 } }}>
+        {/* TABLA CON SCROLL HORIZONTAL (LA CLAVE DEL RESPONSIVE) */}
         <div style={{ width: "100%", overflowX: "auto" }}>
           <Table
             columns={columns}
             dataSource={clientes}
             rowKey="id"
-            scroll={{ x: "max-content" }}
+            scroll={{ x: 1000 }} // Asegura que la tabla no se aplaste en celulares
             pagination={{ pageSize: 5 }}
           />
         </div>
       </Card>
 
-      {/* MODAL CREAR CLIENTE */}
+      {/* MODAL CREAR CLIENTE RECONSTRUIDO */}
       <Modal
-        title="Agregar Nuevo Cliente"
+        title={
+          <span>
+            <UserAddOutlined /> Registrar Nuevo Cliente
+          </span>
+        }
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
@@ -196,7 +291,7 @@ export const ClientesPage: React.FC = () => {
         }}
         footer={null}
         width="90%"
-        style={{ maxWidth: "600px" }}
+        style={{ maxWidth: "700px" }}
         destroyOnClose
       >
         <Form
@@ -208,23 +303,53 @@ export const ClientesPage: React.FC = () => {
           <Form.Item
             name="nombre"
             label="Nombre Completo"
-            rules={[{ required: true, message: "Ingrese el nombre" }]}
+            rules={[{ required: true }]}
           >
-            <Input placeholder="Ej: Juan Pérez" size="large" />
+            <Input placeholder="Ej: Juan Pérez" />
           </Form.Item>
 
           <Form.Item
             name="rut"
-            label="RUT"
-            rules={[{ required: true, message: "Ingrese el RUT" }]}
+            label="RUT (con Módulo 11)"
+            rules={[{ required: true }]}
           >
-            <Input placeholder="Ej: 12.345.678-9" size="large" />
+            <Input placeholder="Ej: 12.345.678-9" />
           </Form.Item>
+
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item name="telefono" label="Teléfono">
+                <Input placeholder="Ej: +56 9 1234 5678" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="email" label="Correo Electrónico">
+                <Input placeholder="Ej: juan.perez@email.com" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="region"
+                label="Región"
+                initialValue="Región Metropolitana de Santiago"
+              >
+                <Input disabled />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="comuna" label="Comuna">
+                <Input placeholder="Ej: Las Condes" />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item
             name="direccion"
-            label="Dirección"
-            rules={[{ required: true, message: "Ingrese la dirección" }]}
+            label="Dirección de Domicilio (Autocompletado y Validación GPS)"
+            rules={[{ required: true }]}
           >
             <AutoComplete
               options={options}
@@ -232,7 +357,6 @@ export const ClientesPage: React.FC = () => {
               onSelect={handleSelectDireccion}
               onBlur={handleBlurDireccion}
               placeholder="Escribe la dirección..."
-              size="large"
             />
           </Form.Item>
 
@@ -255,6 +379,10 @@ export const ClientesPage: React.FC = () => {
             />
           )}
 
+          <Form.Item name="observaciones" label="Observaciones">
+            <TextArea rows={2} />
+          </Form.Item>
+
           <div
             style={{
               display: "flex",
@@ -263,12 +391,10 @@ export const ClientesPage: React.FC = () => {
               marginTop: "24px",
             }}
           >
-            <Button onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              disabled={!direccionValidada}
-            >
+            <Button type="text" onClick={() => setIsModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="primary" htmlType="submit">
               Guardar Cliente
             </Button>
           </div>
