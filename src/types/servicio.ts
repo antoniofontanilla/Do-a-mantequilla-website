@@ -1,5 +1,5 @@
-// Tipos para los servicios y cotizaciones (HU 4 y 10)
-export type TipoServicio =
+// Tipos de servicio estandarizados según HU 4
+export type CategoriaServicio =
   | "Sofás"
   | "Sillones"
   | "Sillas"
@@ -10,25 +10,40 @@ export type TipoServicio =
   | "Aseo profundo"
   | "Servicio combinado";
 
-export type EstadoServicio =
-  | "Cotización"
-  | "Pendiente"
-  | "Confirmado"
-  | "Programado"
-  | "En Ruta"
-  | "En Servicio"
-  | "Finalizado"
-  | "Cancelado";
-
-export interface Servicio {
+// Estructura para el Catálogo Base de Servicios
+export interface ServicioCatalogo {
   id: string;
-  clienteId: string;
-  clienteNombre: string;
-  tipoServicio: TipoServicio;
+  nombre: CategoriaServicio;
+  descripcion: string;
+  tiempoEstimadoMinutos: number; // Tiempo promedio base por unidad
+  activo: boolean;
+}
+
+// Estructura de un servicio seleccionado en una orden/solicitud
+export interface ItemServicioSeleccionado {
+  servicioId: string;
+  nombre: CategoriaServicio;
   cantidad: number;
+  tiempoEstimadoMinutosTotal: number; // (tiempo base * cantidad)
   observaciones?: string;
-  tiempoEstimadoMinutos: number;
-  fechaProgramada: string;
-  estado: EstadoServicio;
-  montoTotal: number;
+}
+
+// Estructura completa para la solicitud o cotización de un cliente
+export interface SolicitudServicio {
+  id?: string;
+  clienteId: string;
+  items: ItemServicioSeleccionado[];
+  tiempoTotalEstimadoMinutos: number;
+  observacionesGenerales?: string;
+  estado:
+    | "Cotización"
+    | "Pendiente"
+    | "Confirmado"
+    | "Programado"
+    | "En Ruta"
+    | "En Servicio"
+    | "Finalizado"
+    | "Reprogramado"
+    | "Cancelado";
+  createdAt?: string;
 }

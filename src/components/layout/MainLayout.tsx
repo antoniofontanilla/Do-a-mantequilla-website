@@ -5,6 +5,7 @@ import {
   MenuUnfoldOutlined,
   DashboardOutlined,
   UserOutlined,
+  AppstoreOutlined,
   CalendarOutlined,
   CompassOutlined,
   ToolOutlined,
@@ -15,9 +16,15 @@ const { Header, Sider, Content } = Layout;
 
 interface MainLayoutProps {
   children?: React.ReactNode;
+  activeKey?: string;
+  onSelectMenu?: (key: string) => void;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  activeKey = "/clientes",
+  onSelectMenu,
+}) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -56,13 +63,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["/clientes"]}
+          selectedKeys={[activeKey]}
+          onClick={({ key }) => onSelectMenu && onSelectMenu(key)}
           items={[
             { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
             {
               key: "/clientes",
               icon: <UserOutlined />,
               label: "Gestión de Clientes",
+            },
+            {
+              key: "/servicios",
+              icon: <AppstoreOutlined />,
+              label: "Catálogo de Servicios",
             },
             {
               key: "/agenda",

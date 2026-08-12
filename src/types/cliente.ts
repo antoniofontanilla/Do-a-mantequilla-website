@@ -12,4 +12,8 @@ export interface Cliente {
   latitud?: number;
   longitud?: number;
   createdAt: string;
+
+  // Métricas calculadas (HU 3)
+  distanciaKm?: number;
+  tiempoTrasladoMinutos?: number;
 }

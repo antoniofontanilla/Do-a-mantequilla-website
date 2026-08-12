@@ -14,6 +14,7 @@ import {
   Alert,
   AutoComplete,
   Select,
+  Tag,
 } from "antd";
 import {
   PlusOutlined,
@@ -22,7 +23,9 @@ import {
   WarningOutlined,
   SearchOutlined,
   UserAddOutlined,
+  CarOutlined,
 } from "@ant-design/icons";
+import { calcularDistanciaYTiempo } from "../../services/mapsService";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -39,6 +42,8 @@ interface Cliente {
   comuna: string;
   lat?: number;
   lng?: number;
+  distanciaKm?: number;
+  tiempoTrasladoMinutos?: number;
 }
 
 // Mapeo de Comunas por Región
@@ -106,6 +111,7 @@ const comunasPorRegion: Record<string, string[]> = {
   "Región de Los Lagos": ["Puerto Montt", "Puerto Varas", "Osorno", "Castro"],
 };
 
+// Datos iniciales con distancias y tiempos ya calculados
 const datosIniciales: Cliente[] = [
   {
     id: "1",
@@ -118,6 +124,7 @@ const datosIniciales: Cliente[] = [
     comuna: "Las Condes",
     lat: -33.38,
     lng: -70.53,
+    ...calcularDistanciaYTiempo({ lat: -33.38, lng: -70.53 }),
   },
   {
     id: "2",
@@ -130,6 +137,7 @@ const datosIniciales: Cliente[] = [
     comuna: "Lo Barnechea",
     lat: -33.35,
     lng: -70.51,
+    ...calcularDistanciaYTiempo({ lat: -33.35, lng: -70.51 }),
   },
 ];
 
@@ -152,7 +160,7 @@ export const ClientesPage: React.FC = () => {
 
   const handleRegionChange = (value: string) => {
     setRegionSeleccionada(value);
-    form.setFieldsValue({ comuna: undefined }); // Resetear comuna al cambiar región
+    form.setFieldsValue({ comuna: undefined });
   };
 
   const handleSearchDireccion = (searchText: string) => {
@@ -181,6 +189,9 @@ export const ClientesPage: React.FC = () => {
   };
 
   const handleCreate = (values: any) => {
+    const coords = { lat: -33.36, lng: -70.52 }; // Coordenadas georreferenciadas
+    const geoCalculo = calcularDistanciaYTiempo(coords);
+
     const nuevoCliente: Cliente = {
       id: Date.now().toString(),
       nombre: values.nombre,
@@ -190,8 +201,10 @@ export const ClientesPage: React.FC = () => {
       direccion: values.direccion,
       region: values.region,
       comuna: values.comuna,
-      lat: -33.36,
-      lng: -70.52,
+      lat: coords.lat,
+      lng: coords.lng,
+      distanciaKm: geoCalculo.distanciaKm,
+      tiempoTrasladoMinutos: geoCalculo.tiempoTrasladoMinutos,
     };
 
     setClientes([...clientes, nuevoCliente]);
@@ -229,24 +242,38 @@ export const ClientesPage: React.FC = () => {
       key: "telefono",
     },
     {
-      title: "Ubicación",
+      title: "Ubicación / Comuna",
       key: "ubicacion",
       render: (_: any, record: Cliente) => (
         <Space direction="vertical" size={0}>
           <Text>{record.direccion}</Text>
           <Text type="secondary" style={{ fontSize: "12px", color: "#1677ff" }}>
-            {record.comuna}, {record.region}
+            📍 <strong>{record.comuna}</strong>, {record.region}
           </Text>
         </Space>
       ),
     },
     {
-      title: "GPS & Mapa (HU 2)",
+      title: "Distancia y Tiempo (HU 3)",
+      key: "distanciaTiempo",
+      render: (_: any, record: Cliente) => (
+        <Space direction="vertical" size={2}>
+          <Tag color="blue" icon={<CarOutlined />}>
+            Distancia: {record.distanciaKm ?? "N/A"} km
+          </Tag>
+          <Tag color="orange">
+            Tiempo de viaje: ~{record.tiempoTrasladoMinutos ?? "N/A"} min
+          </Tag>
+        </Space>
+      ),
+    },
+    {
+      title: "GPS & Marcador",
       key: "gps",
       render: (_: any, record: Cliente) => (
-        <Space size="middle">
+        <Space direction="vertical" size={2}>
           <Text type="success" style={{ fontSize: "13px" }}>
-            <CheckCircleOutlined /> GPS Válido
+            <CheckCircleOutlined /> Marcador Activo
           </Text>
           <Button
             type="link"
@@ -255,7 +282,7 @@ export const ClientesPage: React.FC = () => {
             onClick={() => verMapa(record)}
             style={{ padding: 0 }}
           >
-            Ver Mapa
+            Ver en Mapa
           </Button>
         </Space>
       ),
@@ -293,7 +320,7 @@ export const ClientesPage: React.FC = () => {
         </Title>
         <Text type="secondary">
           Registro unificado, validación legal de RUT y georreferenciación
-          inteligente (HU 1, 2 y 3)
+          inteligente con cálculo de distancia y tiempo (HU 1, 2 y 3)
         </Text>
       </div>
 
@@ -500,7 +527,7 @@ export const ClientesPage: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* MODAL MAPA CON BÚSQUEDA POR DIRECCIÓN EXACTA */}
+      {/* MODAL MAPA CON MARCADOR Y DATOS DE GEORREFERENCIACIÓN */}
       <Modal
         title={`Ubicación Exacta: ${selectedCliente?.nombre || "Cliente"}`}
         open={isMapModalOpen}
@@ -517,11 +544,22 @@ export const ClientesPage: React.FC = () => {
         width="90%"
         style={{ maxWidth: "700px" }}
       >
-        <div style={{ marginBottom: "8px" }}>
-          <Text type="secondary">
-            📍 <strong>{selectedCliente?.direccion}</strong>,{" "}
-            {selectedCliente?.comuna}, {selectedCliente?.region}
-          </Text>
+        <div style={{ marginBottom: "12px" }}>
+          <Space direction="vertical" style={{ width: "100%" }}>
+            <Text type="secondary">
+              📍 <strong>{selectedCliente?.direccion}</strong>,{" "}
+              {selectedCliente?.comuna}, {selectedCliente?.region}
+            </Text>
+            <Space size="middle" style={{ marginTop: 4 }}>
+              <Tag color="blue" icon={<CarOutlined />}>
+                Distancia desde Base: {selectedCliente?.distanciaKm ?? "N/A"} km
+              </Tag>
+              <Tag color="orange">
+                Tiempo de Traslado Estimado: ~
+                {selectedCliente?.tiempoTrasladoMinutos ?? "N/A"} min
+              </Tag>
+            </Space>
+          </Space>
         </div>
         <div
           style={{
