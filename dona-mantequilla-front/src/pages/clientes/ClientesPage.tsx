@@ -117,10 +117,10 @@ const comunasPorRegion: Record<string, string[]> = {
 };
 
 // Datos iniciales con distancias y tiempos ya calculados
-const datosIniciales: Cliente[] = [
+const _datosIniciales: Cliente[] = [
   {
     id: "1",
-    nombre: "Juan Pérez",
+    nombre: "Juan Péresz",
     email: "juan.perez@email.com",
     rut: "12.345.678-5",
     telefono: "+56 9 1234 5678",
