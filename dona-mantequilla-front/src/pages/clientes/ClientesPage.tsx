@@ -117,34 +117,6 @@ const comunasPorRegion: Record<string, string[]> = {
 };
 
 // Datos iniciales con distancias y tiempos ya calculados
-const _datosIniciales: Cliente[] = [
-  {
-    id: "1",
-    nombre: "Juan Péresz",
-    email: "juan.perez@email.com",
-    rut: "12.345.678-5",
-    telefono: "+56 9 1234 5678",
-    direccion: "Av. Las Condes 12345",
-    region: "Región Metropolitana de Santiago",
-    comuna: "Las Condes",
-    lat: -33.38,
-    lng: -70.53,
-    ...calcularDistanciaYTiempo({ lat: -33.38, lng: -70.53 }),
-  },
-  {
-    id: "2",
-    nombre: "María González",
-    email: "maria.g@email.com",
-    rut: "9.876.543-1",
-    telefono: "+56 9 8765 4321",
-    direccion: "Av. La Dehesa 456",
-    region: "Región Metropolitana de Santiago",
-    comuna: "Lo Barnechea",
-    lat: -33.35,
-    lng: -70.51,
-    ...calcularDistanciaYTiempo({ lat: -33.35, lng: -70.51 }),
-  },
-];
 
 // Configuración de jornada laboral (09:00 a 18:00 hrs)
 const JORNADA_INICIO = 9;
