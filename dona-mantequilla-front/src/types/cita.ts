@@ -6,6 +6,8 @@ export interface Cita {
   clienteNombre: string;
   direccionCliente: string;
   comunaCliente: string;
+  telefonoCliente?: string;
+  emailCliente?: string;
   fechaHora?: string;
 
   items: ItemServicioSeleccionado[];
