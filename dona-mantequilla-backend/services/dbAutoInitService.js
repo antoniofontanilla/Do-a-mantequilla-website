@@ -15,6 +15,17 @@ async function inicializarEsquemaYDatosCleverCloud(dbPool) {
     const promisePool = dbPool.promise();
 
     try {
+        // Verificación rápida en 1 sola consulta: si ya existen los clientes en Clever Cloud, no saturar conexiones
+        try {
+            const [checkRows] = await promisePool.query('SELECT COUNT(*) AS total FROM clientes');
+            if (checkRows && checkRows[0] && checkRows[0].total > 0) {
+                console.log(`✅ Clever Cloud MySQL listo (${checkRows[0].total} clientes activos en la base de datos)`);
+                return;
+            }
+        } catch {
+            // Si la tabla aún no existe, continúa con la creación completa
+        }
+
         // 1. TABLA CLIENTES
         await promisePool.query(`
             CREATE TABLE IF NOT EXISTS clientes (
