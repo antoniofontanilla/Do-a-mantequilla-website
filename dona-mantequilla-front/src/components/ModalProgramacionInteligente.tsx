@@ -34,6 +34,7 @@ import { MOCK_CLIENTES } from "../data/mockClientes";
 import { MOCK_OPERARIOS } from "../data/mockOperarios";
 import { SERVICIOS_BASE } from "../utils/serviciosData";
 import { IntegracionesTecnicasService } from "../services/integracionesTecnicasService";
+import { API_BASE_URL } from "../config/apiConfig";
 
 const { Option } = Select;
 const { Text, Title } = Typography;
@@ -214,7 +215,7 @@ export const ModalProgramacionInteligente: React.FC<
   useEffect(() => {
     const obtenerClientesBD = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/clientes");
+        const res = await fetch(`${API_BASE_URL}/api/clientes`);
         const data = await res.json();
         if (res.ok && Array.isArray(data) && data.length > 0) {
           const mapeados: Cliente[] = data.map((item: any) => ({

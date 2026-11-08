@@ -1,4 +1,5 @@
 import { Cita } from "../types/cita";
+import { API_BASE_URL } from "../config/apiConfig";
 
 export type PerfilAccesoRBAC = "ADMIN" | "COORDINADOR" | "OPERARIO" | "CLIENTE";
 
@@ -13,7 +14,7 @@ export type PerfilAccesoRBAC = "ADMIN" | "COORDINADOR" | "OPERARIO" | "CLIENTE";
  *   ubicación, tráfico estimado, duración, carga de cada operario y visitas programadas.
  */
 export class IntegracionesTecnicasService {
-  private static readonly API_BASE = "http://localhost:4000/api";
+  private static readonly API_BASE = `${API_BASE_URL}/api`;
   private static perfilActivo: PerfilAccesoRBAC = "ADMIN";
 
   public static obtenerHeadersSeguridad(

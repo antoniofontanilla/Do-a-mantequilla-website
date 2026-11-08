@@ -28,6 +28,7 @@ import {
   CarOutlined,
 } from "@ant-design/icons";
 import { calcularDistanciaYTiempo } from "../../services/mapsService";
+import { API_BASE_URL } from "../../config/apiConfig";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -151,7 +152,7 @@ export const ClientesPage: React.FC = () => {
 
   const fetchClientesFromDB = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/clientes');
+      const response = await fetch(`${API_BASE_URL}/api/clientes`);
       const data = await response.json();
 
       if (response.ok) {
@@ -253,8 +254,8 @@ export const ClientesPage: React.FC = () => {
     };
 
     try {
-      // Petición POST a tu backend de XAMPP
-      const response = await fetch('http://localhost:4000/api/clientes', {
+      // Petición POST al backend (Render / VITE_API_URL)
+      const response = await fetch(`${API_BASE_URL}/api/clientes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

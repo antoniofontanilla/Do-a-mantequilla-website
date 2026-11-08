@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { Cita } from "../types/cita";
+import { API_BASE_URL } from "../config/apiConfig";
 
 const STORAGE_RECORDATORIOS_AUTO_KEY =
   "dona_mantequilla_recordatorios_auto_24h";
@@ -83,7 +84,7 @@ export class RecordatoriosAutomaticosService {
         huboCambios = true;
 
         // Notificar también al motor interno del backend (si está activo)
-        fetch("http://localhost:4000/api/recordatorios/auto", {
+        fetch(`${API_BASE_URL}/api/recordatorios/auto`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

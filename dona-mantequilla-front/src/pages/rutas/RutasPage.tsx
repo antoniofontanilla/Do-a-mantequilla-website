@@ -37,6 +37,7 @@ import {
   calcularDistanciaYTiempo,
   obtenerCoordenadasPorDireccion,
 } from "../../services/mapsService";
+import { API_BASE_URL } from "../../config/apiConfig";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -206,7 +207,7 @@ export const RutasPage: React.FC<RutasPageProps> = ({
   useEffect(() => {
     const cargarDesdeMySQL = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/clientes");
+        const res = await fetch(`${API_BASE_URL}/api/clientes`);
         const data = await res.json();
         if (res.ok && Array.isArray(data) && data.length > 0) {
           const tiemposBase: Record<string, number> = {

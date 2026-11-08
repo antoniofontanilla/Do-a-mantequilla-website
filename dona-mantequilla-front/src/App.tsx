@@ -10,6 +10,7 @@ import { Cita } from "./types/cita";
 import { Cliente } from "./types/cliente";
 import { MOCK_CITAS_EXTENDIDO, MOCK_CLIENTES } from "./data/mockClientes";
 import { SERVICIOS_BASE } from "./utils/serviciosData";
+import { API_BASE_URL } from "./config/apiConfig";
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>("/agenda");
@@ -20,7 +21,7 @@ export default function App() {
   useEffect(() => {
     const fetchClientesBD = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/clientes");
+        const response = await fetch(`${API_BASE_URL}/api/clientes`);
         const data = await response.json();
         if (response.ok && Array.isArray(data) && data.length > 0) {
           const clientesBD: Cliente[] = data.map((item: any) => ({

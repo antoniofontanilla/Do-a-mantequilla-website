@@ -26,6 +26,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { MOCK_OPERARIOS } from "../../data/mockOperarios";
+import { API_BASE_URL } from "../../config/apiConfig";
 
 const { Title, Text } = Typography;
 
@@ -78,7 +79,7 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     const cargarDatosDashboard = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/clientes");
+        const res = await fetch(`${API_BASE_URL}/api/clientes`);
         const data = await res.json();
         if (res.ok && Array.isArray(data) && data.length > 0) {
           let estadosGuardados: Record<
