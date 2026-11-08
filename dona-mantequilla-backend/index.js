@@ -152,6 +152,90 @@ app.get('/api/mantenciones', (req, res) => {
     });
 });
 
+// ==========================================
+// RUTA PARA ELIMINAR UN CLIENTE POR ID
+// ==========================================
+app.delete('/api/clientes/:id', async (req, res) => {
+    const { id } = req.params;
+    const promisePool = db.promise();
+
+    try {
+        await promisePool.query('DELETE FROM citas WHERE cliente_id = ?', [id]);
+        await promisePool.query('DELETE FROM mantenciones WHERE cliente_id = ?', [id]);
+        const [result] = await promisePool.query('DELETE FROM clientes WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Cliente eliminado correctamente'
+        });
+    } catch (err) {
+        console.error('Error al eliminar el cliente:', err.message);
+        res.status(500).json({ error: 'Error al eliminar el cliente de la base de datos' });
+    }
+});
+
+// ==========================================
+// RUTA PARA ACTUALIZAR UN CLIENTE POR ID
+// ==========================================
+app.put('/api/clientes/:id', (req, res) => {
+    const { id } = req.params;
+    const {
+        nombre,
+        email,
+        rut,
+        telefono,
+        direccion,
+        region,
+        comuna,
+        fecha_cita,
+        fechaCita,
+        hora_cita,
+        horaCita,
+        servicio
+    } = req.body;
+
+    const fechaCitaFinal = fecha_cita !== undefined ? fecha_cita : fechaCita;
+    const horaCitaFinal = hora_cita !== undefined ? hora_cita : horaCita;
+
+    const query = `
+        UPDATE clientes 
+        SET nombre = ?, email = ?, rut = ?, telefono = ?, direccion = ?, region = ?, comuna = ?, fecha_cita = ?, hora_cita = ?, servicio = ?
+        WHERE id = ?
+    `;
+
+    const values = [
+        nombre,
+        email || '',
+        rut,
+        telefono || '',
+        direccion,
+        region || 'Región Metropolitana de Santiago',
+        comuna,
+        fechaCitaFinal || null,
+        horaCitaFinal || null,
+        servicio || null,
+        id
+    ];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error('Error al actualizar el cliente:', err.message);
+            return res.status(500).json({ error: 'Error al actualizar el cliente en la base de datos' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Cliente actualizado correctamente'
+        });
+    });
+});
+
 // Iniciar servidor
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

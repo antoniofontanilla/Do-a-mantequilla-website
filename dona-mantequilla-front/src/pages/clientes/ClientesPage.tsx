@@ -17,6 +17,8 @@ import {
   Tag,
   DatePicker,
   TimePicker,
+  Popconfirm,
+  message,
 } from "antd";
 import {
   PlusOutlined,
@@ -143,7 +145,10 @@ export const ClientesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
   // 2. AGREGA ESTO: Se ejecuta automáticamente al abrir la página para traer los clientes de la BD
   useEffect(() => {
@@ -296,6 +301,54 @@ export const ClientesPage: React.FC = () => {
     setIsMapModalOpen(true);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/clientes/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        message.success("Cliente eliminado");
+        setClientes((prev) => prev.filter((c) => c.id !== id));
+      } else {
+        message.error("No se pudo eliminar el cliente");
+      }
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+      message.error("Error de conexión al eliminar el cliente");
+    }
+  };
+
+  const handleOpenEdit = (record: any) => {
+    setEditingCliente(record);
+    editForm.setFieldsValue(record);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (values: any) => {
+    if (!editingCliente) return;
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/clientes/${editingCliente.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        },
+      );
+      if (response.ok) {
+        message.success("Cliente actualizado");
+        setIsEditModalOpen(false);
+        setEditingCliente(null);
+        fetchClientesFromDB();
+      } else {
+        message.error("No se pudo actualizar el cliente");
+      }
+    } catch (error) {
+      console.error("Error al actualizar cliente:", error);
+      message.error("Error de conexión al actualizar el cliente");
+    }
+  };
+
   const columns = [
     {
       title: "Cliente",
@@ -384,14 +437,26 @@ export const ClientesPage: React.FC = () => {
     {
       title: "Acciones",
       key: "acciones",
-      render: () => (
+      render: (_: any, record: any) => (
         <Space size="middle">
-          <Button type="link" size="small" style={{ padding: 0 }}>
+          <Button
+            type="link"
+            size="small"
+            style={{ padding: 0 }}
+            onClick={() => handleOpenEdit(record)}
+          >
             Editar
           </Button>
-          <Button type="link" size="small" danger style={{ padding: 0 }}>
-            Eliminar
-          </Button>
+          <Popconfirm
+            title="¿Seguro que deseas eliminar este cliente?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button type="link" size="small" danger style={{ padding: 0 }}>
+              Eliminar
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -710,6 +775,147 @@ export const ClientesPage: React.FC = () => {
             />
           )}
         </div>
+      </Modal>
+
+      <Modal
+        title="Editar Cliente"
+        open={isEditModalOpen}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setEditingCliente(null);
+          editForm.resetFields();
+        }}
+        footer={null}
+        width="90%"
+        style={{ maxWidth: "700px" }}
+        destroyOnClose
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          onFinish={handleEditSubmit}
+          style={{ marginTop: "16px" }}
+        >
+          <Form.Item
+            name="nombre"
+            label="Nombre Completo"
+            rules={[{ required: true, message: "Ingrese el nombre" }]}
+          >
+            <Input placeholder="Ej: Juan Pérez" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="rut"
+                label="RUT"
+                rules={[{ required: true, message: "Ingrese el RUT" }]}
+              >
+                <Input placeholder="Ej: 12.345.678-9" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="telefono" label="Teléfono">
+                <Input placeholder="Ej: +56 9 1234 5678" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item name="email" label="Correo Electrónico">
+            <Input placeholder="Ej: juan.perez@email.com" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col xs={24} md={8}>
+              <Form.Item name="fechaCita" label="Fecha de la Cita (YYYY-MM-DD)">
+                <Input placeholder="Ej: 2026-10-15" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={8}>
+              <Form.Item name="horaCita" label="Hora de Inicio (HH:mm)">
+                <Input placeholder="Ej: 10:30" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={8}>
+              <Form.Item name="servicio" label="Servicio Requerido">
+                <Input placeholder="Ej: Mantención, Instalación..." />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="region"
+                label="Región"
+                rules={[{ required: true, message: "Seleccione una región" }]}
+              >
+                <Select
+                  onChange={(val) => {
+                    setRegionSeleccionada(val);
+                    editForm.setFieldsValue({ comuna: undefined });
+                  }}
+                  placeholder="Seleccione una región"
+                >
+                  {Object.keys(comunasPorRegion).map((reg) => (
+                    <Option key={reg} value={reg}>
+                      {reg}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="comuna"
+                label="Comuna"
+                rules={[{ required: true, message: "Seleccione una comuna" }]}
+              >
+                <Select placeholder="Seleccione una comuna" showSearch>
+                  {(
+                    comunasPorRegion[
+                      editForm.getFieldValue("region") || regionSeleccionada
+                    ] || []
+                  ).map((com) => (
+                    <Option key={com} value={com}>
+                      {com}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="direccion"
+            label="Dirección de Domicilio"
+            rules={[{ required: true, message: "Ingrese la dirección" }]}
+          >
+            <Input placeholder="Ej: Av. Las Condes 12345" />
+          </Form.Item>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "8px",
+              marginTop: "24px",
+            }}
+          >
+            <Button
+              type="text"
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setEditingCliente(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Guardar
+            </Button>
+          </div>
+        </Form>
       </Modal>
     </div>
   );
