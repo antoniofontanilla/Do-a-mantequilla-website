@@ -1,4 +1,4 @@
-/* ✅ ESTILO LIMPIO PARA RESPONSIVE */
+/* ✅ ESTILO LIMPIO PARA RESPONSIVE (PC, Tablet y Celular) */
 html,
 body,
 #root {
@@ -7,4 +7,22 @@ body,
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+}
+
+/* Adaptabilidad automática para Tablet (<= 1024px) y Celular (<= 768px) */
+.ant-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .ant-layout-content {
+    margin: 8px !important;
+    padding: 12px !important;
+  }
+
+  .ant-modal {
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+  }
 }

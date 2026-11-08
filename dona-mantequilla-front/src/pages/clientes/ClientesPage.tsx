@@ -168,8 +168,12 @@ export const ClientesPage: React.FC = () => {
           lng: item.longitud ? Number(item.longitud) : undefined,
           distanciaKm: item.distancia_km ? Number(item.distancia_km) : undefined,
           tiempoTrasladoMinutos: item.tiempo_traslado_min ? Number(item.tiempo_traslado_min) : undefined,
-          fechaCita: item.fecha_cita || undefined,
-          horaCita: item.hora_cita || undefined,
+          fechaCita: item.fecha_cita
+            ? String(item.fecha_cita).slice(0, 10)
+            : undefined,
+          horaCita: item.hora_cita
+            ? String(item.hora_cita).slice(0, 5)
+            : undefined,
           servicio: item.servicio || "Instalación / Mantención",
         }));
 
@@ -243,6 +247,9 @@ export const ClientesPage: React.FC = () => {
       longitud: coords.lng,
       distancia_km: geoCalculo.distanciaKm,
       tiempo_traslado_min: geoCalculo.tiempoTrasladoMinutos,
+      fecha_cita: fechaFormateada,
+      hora_cita: horaFormateada,
+      servicio: values.servicio,
     };
 
     try {
@@ -452,7 +459,7 @@ export const ClientesPage: React.FC = () => {
             dataSource={clientes}
             rowKey="id"
             scroll={{ x: 1200 }}
-            pagination={{ pageSize: 5 }}
+            pagination={{ pageSize: 15, showSizeChanger: true }}
           />
         </div>
       </Card>
